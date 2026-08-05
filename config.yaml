@@ -1,0 +1,40 @@
+# CGV 예매 오픈 감시 설정
+
+theater:
+  site_no: "0013"
+  name: "CGV 용산아이파크몰"
+
+movie:
+  # movNm(영화명)에 포함되면 매칭. 여러 개 등록 가능.
+  match:
+    - "오디세이"
+
+screen:
+  # scnsNm(상영관명)에 포함되면 매칭. 비우면([]) 모든 상영관 대상.
+  match:
+    - "IMAX관"
+
+watch:
+  # 감시할 상영일 범위 (YYYY-MM-DD, 양 끝 포함)
+  start_date: "2026-08-22"
+  end_date: "2026-08-22"
+  # 감시할 시작 시각대 (HH:MM, 24시간 표기, 심야 회차의 24시 이후 표기는 이 범위로 자연히 제외됨)
+  start_time: "09:00"
+  end_time: "22:00"
+
+poll:
+  # 날짜 범위 내에서 매 tick마다 하루씩 순환 조회하므로,
+  # 범위가 넓어져도 초당 요청 수는 이 값으로 고정된다.
+  interval_seconds: 1.0
+  jitter_seconds: 1.0
+  # 세션(쿠키) 재발급 주기
+  session_refresh_minutes: 30
+  # 오류 시 백오프 (초)
+  backoff_initial_seconds: 5
+  backoff_max_seconds: 300
+
+alerts:
+  # 좌석이 남아있는 동안 재알림 주기 (분)
+  repeat_minutes: 5
+  # 정상 작동 알림 주기 (분)
+  heartbeat_minutes: 60
