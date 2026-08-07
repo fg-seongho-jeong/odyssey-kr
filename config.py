@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
 import yaml
 from dotenv import load_dotenv
+
+logger = logging.getLogger("config")
 
 
 class ConfigError(Exception):
@@ -17,7 +20,7 @@ class ConfigError(Exception):
 @dataclass
 class Config:
     telegram_token: str
-    telegram_chat_id: str
+    telegram_chat_id: str  # 최초 구독자 seed용. 비어 있으면 /start로만 구독자가 생긴다.
 
     site_no: str
     theater_name: str
@@ -25,16 +28,22 @@ class Config:
     movie_match: list[str]
     screen_match: list[str]
 
+    # 최초 구독자(telegram_chat_id) 기본 조건 seed용. 구독자별 실제 감시 조건은
+    # subscribers.py의 WatchPrefs(/start 대화형 설정)를 따른다.
     start_date: date
     end_date: date
     start_minutes: int
     end_minutes: int
+
+    good_seat_enabled: bool
+    good_seat_min_free_ratio: float
 
     interval_seconds: float
     jitter_seconds: float
     session_refresh_minutes: int
     backoff_initial_seconds: float
     backoff_max_seconds: float
+    subscriber_poll_seconds: float
 
     repeat_minutes: int
     heartbeat_minutes: int
@@ -80,10 +89,14 @@ def load_config(config_path: str = "config.yaml", env_path: str = ".env") -> Con
             "@BotFather에서 발급받은 토큰을 입력하세요."
         )
     if not chat_id or "your-chat-id" in chat_id:
-        raise ConfigError(
-            f"{env_path}에 TELEGRAM_CHAT_ID가 설정되지 않았습니다. "
-            "get_chat_id.py를 실행해 값을 확인하세요."
+        # 필수는 아니다: 구독자는 봇에게 메시지를 보내면(/start) 자동으로 등록된다.
+        # 설정되어 있으면 최초 구독자로 seed하는 용도로만 쓰인다.
+        logger.warning(
+            "%s에 TELEGRAM_CHAT_ID가 없습니다. 최초 구독자 없이 시작하며, "
+            "누군가 봇에게 메시지를 보내야 구독이 시작됩니다.",
+            env_path,
         )
+        chat_id = ""
 
     with open(config_path, encoding="utf-8") as f:
         raw = yaml.safe_load(f)
@@ -93,6 +106,7 @@ def load_config(config_path: str = "config.yaml", env_path: str = ".env") -> Con
         movie = raw["movie"]
         screen = raw.get("screen", {})
         watch = raw["watch"]
+        good_seat = raw.get("good_seat", {})
         poll = raw.get("poll", {})
         alerts = raw.get("alerts", {})
 
@@ -107,11 +121,14 @@ def load_config(config_path: str = "config.yaml", env_path: str = ".env") -> Con
             end_date=_parse_date(watch["end_date"], "watch.end_date"),
             start_minutes=_parse_hhmm(watch["start_time"], "watch.start_time"),
             end_minutes=_parse_hhmm(watch["end_time"], "watch.end_time"),
+            good_seat_enabled=bool(good_seat.get("enabled", True)),
+            good_seat_min_free_ratio=float(good_seat.get("min_free_ratio", 0.12)),
             interval_seconds=float(poll.get("interval_seconds", 1.0)),
             jitter_seconds=float(poll.get("jitter_seconds", 1.0)),
             session_refresh_minutes=int(poll.get("session_refresh_minutes", 30)),
             backoff_initial_seconds=float(poll.get("backoff_initial_seconds", 5)),
             backoff_max_seconds=float(poll.get("backoff_max_seconds", 300)),
+            subscriber_poll_seconds=float(poll.get("subscriber_poll_seconds", 5)),
             repeat_minutes=int(alerts.get("repeat_minutes", 5)),
             heartbeat_minutes=int(alerts.get("heartbeat_minutes", 60)),
         )
