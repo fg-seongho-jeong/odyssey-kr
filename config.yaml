@@ -51,4 +51,4 @@ alerts:
   # 좌석이 남아있는 동안 재알림 주기 (분)
   repeat_minutes: 2
   # 정상 작동 알림 주기 (분)
-  heartbeat_minutes: 60
+  heartbeat_minutes: 360
