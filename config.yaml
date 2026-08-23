@@ -1,8 +1,8 @@
 # CGV 예매 오픈 감시 설정
 
 theater:
-  site_no: "0013"
-  name: "CGV 용산아이파크몰"
+  site_no: "0199"
+  name: "CGV 천호"
 
 movie:
   # movNm(영화명)에 포함되면 매칭. 여러 개 등록 가능.
@@ -17,11 +17,11 @@ screen:
 watch:
   # 구독자별 날짜/시간대는 텔레그램에서 /start로 각자 설정한다(subscribers.json).
   # 아래 값은 최초 구독자(.env의 TELEGRAM_CHAT_ID)의 기본값으로만 쓰인다.
-  start_date: "2026-08-22"
-  end_date: "2026-08-22"
+  start_date: "2026-08-23"
+  end_date: "2026-09-04"
   # HH:MM, 24시간 표기. 심야 회차의 24시 이후 표기(예: 2400, 2500)는 이 범위로 자연히 제외됨.
-  start_time: "09:00"
-  end_time: "22:00"
+  start_time: "18:00"
+  end_time: "23:59"
 
 good_seat:
   # true면 "적당히 괜찮은 자리(중간 블록일 가능성이 높은 수준)"가 나올 때만 알림.
