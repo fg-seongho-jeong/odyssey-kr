@@ -81,6 +81,7 @@ class TelegramClient:
 class _SeenState:
     last_notified_at: float
     last_free_seats: int
+    notify_count: int = 0
 
 
 @dataclass
@@ -151,18 +152,38 @@ class AlertManager:
             message: str | None = None
             for chat_id in recipients:
                 skey = f"{chat_id}:{st.key}"
-                seen = self._state.get(skey)
-                should_send = seen is None or (now - seen.last_notified_at) >= self.repeat_seconds
-                if not should_send:
-                    continue
-                if message is None:
-                    message = self._format_message(st)
-                result = self.telegram.send(chat_id, message)
-                if result.ok:
-                    self._state[skey] = _SeenState(last_notified_at=now, last_free_seats=st.free_seats)
-                    sent_events += 1
-                elif result.blocked:
-                    self._drop_subscriber(chat_id)
+          seen = self._state.get(skey)
+
+# 회차별 최대 5회까지만 알림
+if seen is not None and seen.notify_count >= 5:
+    continue
+
+should_send = (
+    seen is None
+    or (now - seen.last_notified_at) >= self.repeat_seconds
+)
+
+if not should_send:
+    continue
+
+if message is None:
+    message = self._format_message(st)
+
+result = self.telegram.send(chat_id, message)
+
+if result.ok:
+    previous_count = seen.notify_count if seen is not None else 0
+
+    self._state[skey] = _SeenState(
+        last_notified_at=now,
+        last_free_seats=st.free_seats,
+        notify_count=previous_count + 1,
+    )
+
+    sent_events += 1
+
+elif result.blocked:
+    self._drop_subscriber(chat_id)
 
         return sent_events
 
