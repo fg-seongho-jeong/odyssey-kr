@@ -17,8 +17,8 @@ screen:
 watch:
   # 구독자별 날짜/시간대는 텔레그램에서 /start로 각자 설정한다(subscribers.json).
   # 아래 값은 최초 구독자(.env의 TELEGRAM_CHAT_ID)의 기본값으로만 쓰인다.
-  start_date: "2026-08-23"
-  end_date: "2026-09-04"
+  start_date: "2026-09-04"
+  end_date: "2026-09-06"
   # HH:MM, 24시간 표기. 심야 회차의 24시 이후 표기(예: 2400, 2500)는 이 범위로 자연히 제외됨.
   start_time: "18:00"
   end_time: "23:59"
@@ -37,8 +37,8 @@ good_seat:
 poll:
   # 날짜 범위 내에서 매 tick마다 하루씩 순환 조회하므로,
   # 범위가 넓어져도 초당 요청 수는 이 값으로 고정된다.
-  interval_seconds: 30.0
-  jitter_seconds: 3.0
+  interval_seconds: 20.0
+  jitter_seconds: 2.0
   # 세션(쿠키) 재발급 주기
   session_refresh_minutes: 30
   # 오류 시 백오프 (초)
