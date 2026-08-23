@@ -148,44 +148,44 @@ class AlertManager:
                 for chat_id in recipients:
                     self._state.pop(f"{chat_id}:{st.key}", None)
                 continue
-
             message: str | None = None
             for chat_id in recipients:
                 skey = f"{chat_id}:{st.key}"
-          seen = self._state.get(skey)
+                seen = self._state.get(skey)
 
-# 회차별 최대 5회까지만 알림
-if seen is not None and seen.notify_count >= 5:
-    continue
+                # 회차별 최대 5회까지만 알림
+                if seen is not None and seen.notify_count >= 5:
+                    continue
 
-should_send = (
-    seen is None
-    or (now - seen.last_notified_at) >= self.repeat_seconds
-)
+                should_send = (
+                    seen is None
+                    or (now - seen.last_notified_at) >= self.repeat_seconds
+                )
 
-if not should_send:
-    continue
+                if not should_send:
+                    continue
 
-if message is None:
-    message = self._format_message(st)
+                if message is None:
+                    message = self._format_message(st)
 
-result = self.telegram.send(chat_id, message)
+                result = self.telegram.send(chat_id, message)
 
-if result.ok:
-    previous_count = seen.notify_count if seen is not None else 0
+                if result.ok:
+                    previous_count = seen.notify_count if seen is not None else 0
 
-    self._state[skey] = _SeenState(
-        last_notified_at=now,
-        last_free_seats=st.free_seats,
-        notify_count=previous_count + 1,
-    )
+                    self._state[skey] = _SeenState(
+                        last_notified_at=now,
+                        last_free_seats=st.free_seats,
+                        notify_count=previous_count + 1,
+                    )
 
-    sent_events += 1
+                    sent_events += 1
 
-elif result.blocked:
-    self._drop_subscriber(chat_id)
+                elif result.blocked:
+                    self._drop_subscriber(chat_id)
 
         return sent_events
+
 
     def _format_message(self, st: Showtime) -> str:
         date_fmt = f"{st.play_date[:4]}-{st.play_date[4:6]}-{st.play_date[6:]}"
