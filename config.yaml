@@ -37,8 +37,8 @@ good_seat:
 poll:
   # 날짜 범위 내에서 매 tick마다 하루씩 순환 조회하므로,
   # 범위가 넓어져도 초당 요청 수는 이 값으로 고정된다.
-  interval_seconds: 1.0
-  jitter_seconds: 1.0
+  interval_seconds: 30.0
+  jitter_seconds: 3.0
   # 세션(쿠키) 재발급 주기
   session_refresh_minutes: 30
   # 오류 시 백오프 (초)
